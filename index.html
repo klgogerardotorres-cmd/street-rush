@@ -31,7 +31,7 @@ html{--hs:clamp(100px,28vmin,170px);--hb:clamp(54px,17vh,150px)}
 <div id="jx"><span>◀</span><span>▲</span><span>▶</span></div><div id="top"><div id="pos"></div><div id="heat"><div id="hf"></div></div><div id="esc"><div id="ef"></div></div><div id="hl" style="display:none;font-size:13px;margin-top:2px">🚔 POLICÍA · si se llena te embisten</div></div>
 <canvas id="spd" width="320" height="320"></canvas><div id="nit">🔥</div><div id="msg"></div>
 <div id="res"><div id="rt"></div><small id="rs"></small></div>
-<div id="hint">Izquierda sola: giras a la izquierda · Derecha sola: a la derecha<br>Ambas manos: aceleras<br>En las bifurcaciones el auto toma la calle según el lado de la calzada donde vas · La ruta principal es la naranja del mapa<br>Sube a la acera para romper postes y señales · Las rampas te hacen saltar<br>¡Escapa de la policía! Si se llena la barra, te embisten</div>
+<div id="hint">Izquierda sola: giras a la izquierda · Derecha sola: a la derecha<br>Ambas manos: aceleras<br>En las bifurcaciones el auto toma la calle según el lado de la calzada donde vas · La ruta principal es la naranja del mapa<br>Sube a la acera para romper postes y señales · Las rampas te hacen saltar<br>¡Escapa de la policía! Si se llena la barra, te embisten<br><small style="font-weight:600;opacity:.85">Con teclado: A o ← = mano izquierda · L o → = mano derecha · ↑ o Espacio = ambas · P = panel del adulto</small></div>
 <div id="cap"></div><div id="p"></div>
 <script src="lib/three.min.js"></script>
 <script src="lib/Sky.js"></script>
@@ -63,8 +63,9 @@ const cap=$('cap');
 cap.onpointerdown=e=>{e.preventDefault();unlockAudio();if(e.clientX>innerWidth-110&&e.clientY<110){ct=setTimeout(()=>{pan=1;tc.clear();$('p').style.display='block'},3000);return}tc.set(e.pointerId,side(e.clientX));$('hint').style.display='none'};
 const up=e=>{clearTimeout(ct);const s=tc.get(e.pointerId);if(s){tc.delete(e.pointerId);off[s]=performance.now()}};
 cap.onpointerup=e=>{unlockAudio();up(e)};cap.onpointercancel=up;cap.oncontextmenu=e=>e.preventDefault();
-addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(k==='a')ks.L=1;if(k==='l')ks.R=1});
-addEventListener('keyup',e=>{const k=e.key.toLowerCase();if(k==='a'){ks.L=0;off.L=performance.now()}if(k==='l'){ks.R=0;off.R=performance.now()}});
+const KBM={a:['L'],arrowleft:['L'],l:['R'],arrowright:['R'],arrowup:['L','R'],' ':['L','R'],w:['L','R']};
+addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(k==='p'&&!e.repeat){pan=pan?0:1;tc.clear();$('p').style.display=pan?'block':'none';return}const m=KBM[k];if(!m||pan)return;e.preventDefault();$('hint').style.display='none';unlockAudio();m.forEach(s=>ks[s]=1)});
+addEventListener('keyup',e=>{const m=KBM[e.key.toLowerCase()];if(!m)return;m.forEach(s=>{ks[s]=0;off[s]=performance.now()})});
 
 // ---- Escena ----
 const R=new THREE.WebGLRenderer({canvas:$('c'),antialias:true});
