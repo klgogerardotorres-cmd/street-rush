@@ -98,7 +98,7 @@ function unlockAudio(){try{if(window.speechSynthesis&&!window.__su){window.__su=
  const o1=AC.createOscillator(),o2=AC.createOscillator(),lp=AC.createBiquadFilter(),eg=AC.createGain();o1.type='sawtooth';o2.type='square';lp.type='lowpass';lp.frequency.value=500;eg.gain.value=0;o1.connect(lp);o2.connect(lp);lp.connect(eg);eg.connect(master);o1.start();o2.start();eng={o1,o2,lp,eg};
  const so=AC.createOscillator(),sg=AC.createGain();so.type='triangle';so.frequency.value=800;sg.gain.value=0;so.connect(sg);sg.connect(master);so.start();sir={so,sg}}
  if(AC.state!=='running')AC.resume()}catch(e){AC=null}}
-function audioTick(){if(!AC||!eng)return;const t=AC.currentTime,v=pl.v,go=state==='go'||state==='fin';master.gain.setTargetAtTime(P.snd?P.vol/100:0,t,.1);
+function audioTick(){if(!AC||!eng)return;const t=AC.currentTime,v=pl.v,go=state==='go'||state==='fin';master.gain.setTargetAtTime((P.snd?P.vol/100:0)*duck,t,.08);
  const f=(window.SR2&&SR2.engF?SR2.engF(v):45+v*1.7)+(pl.nT>0?25:0);eng.o1.frequency.setTargetAtTime(f,t,.08);eng.o2.frequency.setTargetAtTime(f*1.5,t,.08);eng.lp.frequency.setTargetAtTime(350+v*14,t,.1);eng.eg.gain.setTargetAtTime(go?.09+Math.min(.07,v*.001):.035,t,.1);
  const on=chasing&&!(window.SR2&&SR2.ok);sir.sg.gain.setTargetAtTime(on?.05:0,t,.1);if(on)sir.so.frequency.setValueAtTime(Math.floor(t*2)%2?760:980,t)}
 function sfx(k){if(!AC||!P.snd||!NB)return;const t=AC.currentTime;
@@ -903,10 +903,11 @@ let spVoice=null;
 function spVoices(){try{return speechSynthesis.getVoices().filter(x=>/^es/i.test(x.lang))}catch(e){return[]}}
 try{speechSynthesis.onvoiceschanged=()=>{spVoice=null}}catch(e){}
 function spPick(){if(spVoice)return spVoice;const vs=spVoices();if(!vs.length)return null;const sc=x=>{let s=0;const n=x.name||'';if(/paulina/i.test(n))s+=100;if(/premium|enhanced|mejorada|natural/i.test(n))s+=30;if(/es[-_]CL/i.test(x.lang))s+=20;else if(/es[-_](MX|US|419)/i.test(x.lang))s+=15;if(x.localService)s+=5;if(/eddy|flo|grandma|grandpa|reed|rocko|sandy|shelley|bad news|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox/i.test(n))s-=200;return s};vs.sort((a,b)=>sc(b)-sc(a));spVoice=vs[0];return spVoice}
+let duck=1,duckT=0;const duckOn=()=>{duck=.18;clearTimeout(duckT);duckT=setTimeout(()=>{duck=1},14000)},duckOff=()=>{clearTimeout(duckT);duck=1};
 const ISMAC=/Macintosh/.test(navigator.userAgent)&&!(navigator.maxTouchPoints>1);
 const vPitch=d=>ISMAC?Math.max(d,.95):d,vVol=f=>Math.min(1,(P.vvol/100)*(f||1));
 function speak(t,force){try{const ss=window.speechSynthesis;if(!ss)return false;if(ss.paused)ss.resume();
- const go=()=>{const u=new SpeechSynthesisUtterance(t),v=spPick();u.lang=v?v.lang:'es-ES';if(v)u.voice=v;u.rate=1.12;u.pitch=vPitch(.6);u.volume=vVol(1);u.onend=u.onerror=()=>radioOff();radioOn();ss.speak(u)};
+ const go=()=>{const u=new SpeechSynthesisUtterance(t),v=spPick();u.lang=v?v.lang:'es-ES';if(v)u.voice=v;u.rate=1.12;u.pitch=vPitch(.6);u.volume=vVol(1);u.onend=u.onerror=()=>{radioOff();duckOff()};radioOn();duckOn();ss.speak(u)};
  if(ss.speaking||ss.pending){if(!force)return false;ss.cancel();setTimeout(go,140);return true}
  go();return true}catch(e){return false}}
 function polSay(k){if(!P.snd||!P.polv)return;const L=POLV[k],t=L[Math.random()*L.length|0];try{sfx('beep')}catch(e){}setTimeout(()=>speak(t,k!=='chase'),260)}
@@ -1597,7 +1598,7 @@ window.radioOn=radioOn;window.radioOff=radioOff;
 // ---- voz: un poco más grave y rápida, como en una transmisión ----
 window.speak=function(t,force){
  try{const ss=window.speechSynthesis;if(!ss)return false;if(ss.paused)ss.resume();
-  const go=()=>{const u=new SpeechSynthesisUtterance(t),v=spPick();u.lang=v?v.lang:'es-ES';if(v)u.voice=v;u.rate=1.16;u.pitch=vPitch(.7);u.volume=vVol(1);u.onend=u.onerror=()=>radioOff();radioOn();ss.speak(u)};
+  const go=()=>{const u=new SpeechSynthesisUtterance(t),v=spPick();u.lang=v?v.lang:'es-ES';if(v)u.voice=v;u.rate=1.16;u.pitch=vPitch(.7);u.volume=vVol(1);u.onend=u.onerror=()=>{radioOff();duckOff()};radioOn();duckOn();ss.speak(u)};
   if(ss.speaking||ss.pending){if(!force)return false;ss.cancel();setTimeout(go,140);return true}
   go();return true}catch(e){return false}};
 
