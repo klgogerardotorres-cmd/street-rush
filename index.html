@@ -622,7 +622,7 @@ sun.shadow.mapSize.set(2048,2048);sun.shadow.bias=-.0004;sun.shadow.normalBias=.
 let comp=null,bloom=null,pFin=null,pOut=null,tmMode=1;const EXK=1;
 function initComp(){if(!(THREE.EffectComposer&&THREE.RenderPass&&THREE.ShaderPass&&THREE.UnrealBloomPass&&THREE.OutputPass))return;
  try{const pr=R.getPixelRatio(),w=innerWidth,h=innerHeight;
-  const rt=new THREE.WebGLRenderTarget(4,4,{type:THREE.HalfFloatType,format:THREE.RGBAFormat,minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter,samples:4});
+  const rt=new THREE.WebGLRenderTarget(4,4,{type:THREE.HalfFloatType,format:THREE.RGBAFormat,minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter});   // sin MSAA: el brillo (bloom) mezcla sobre este búfer y Safari en Mac no conserva su contenido multimuestreado
   comp=new THREE.EffectComposer(R,rt);comp.setPixelRatio(pr);comp.setSize(w,h);
   comp.addPass(new THREE.RenderPass(scn,cam));
   bloom=new THREE.UnrealBloomPass(new THREE.Vector2(w*pr,h*pr),.35,.5,1.8);comp.addPass(bloom);
